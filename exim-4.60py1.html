@@ -1,0 +1,643 @@
+<html>
+
+<head>
+<title>Exim-Python Extension</title>
+<link rel="stylesheet" href="docs.css" />
+</head>
+
+<body>
+
+
+<div id="frontal">
+
+<h1>The Exim-Python Extension</h1>
+
+<p>
+<strong>Release 4.60py1</strong><br />
+21st January, 2006
+</p>
+
+<p>
+<strong>&copy; 2004-2006 David Wilson
+&lt;<a href="mailto:dw@botanicus.net">dw@botanicus.net</a>&gt;
+</strong>
+</p>
+
+<p>
+All rights reserved except those specifically granted under the accompanying
+license. Please see the file <code>LICENSE</code> from the source distribution.
+</p>
+
+</div>
+
+
+
+
+<h2>Contents</h2>
+
+<ol>
+<li><a href="#what">What is 'Exim-Python'?</a></li>
+<li><a href="#why">Why might I need the extension?</a></li>
+<li><a href="#install">How do I install the extension?</a></li>
+<li><a href="#usage">How do I use the extension?</a></li>
+<li><a href="#notes">Things you should know before use.</a></li>
+<li><a href="#examples">Usage examples.</a></li>
+<li><a href="#changes">Changes between versions.</a></li>
+<li><a href="#future">Future considerations.</a></li>
+</ol>
+
+
+
+
+<a name="what"></a>
+<h2>What is 'Exim-Python'?</h2>
+
+
+<div class="section">
+
+    <h3>Exim</h3>
+
+    <p>
+    Exim is a message transfer agent (MTA) developed at the University of
+    Cambridge for use on Unix systems connected to the Internet. There is a
+    great deal of flexibility in the way mail can be routed, and there are
+    extensive facilities for checking incoming mail.
+    </p>
+
+    <p>
+    <a href="http://www.exim.org/">http://www.exim.org/</a>
+    </p>
+
+
+    <h3>Python</h3>
+
+    <p>
+    Python is an interpreted, interactive, object-oriented programming
+    language. It is often compared to Tcl, Perl, Scheme or Java. Python
+    combines remarkable power with very clear syntax. It has modules, classes,
+    exceptions, very high level dynamic data types, and dynamic typing. There
+    are interfaces to many system calls and libraries.
+    </p>
+
+    <p>
+    <a href="http://www.python.org/">http://www.python.org/</a>
+    </p>
+
+
+    <h3>Exim-Python</h3>
+
+    <p>
+    Exim-Python is the name for an extension to Exim which adds the ability to
+    execute compiled Python functions and methods from within Exim
+    configuration file string expansions. Since Exim uses string expansions
+    heavily throughout it's operation, this feature allows powerful added
+    control to an already very flexible mail server.
+    </p>
+
+    <p>
+    <a href="http://botanicus.net/dw/">http://botanicus.net/dw/</a>
+    </p>
+
+</div>
+
+
+
+
+<a name="why"></a>
+<h2>Why might I need the extension?</h2>
+
+<div class="section">
+    <p>
+    Exim alone is an extremely powerful mail server, approaching as feature
+    complete as one can expect from any mail server software. It is also fairly
+    easy to extend Exim using native code, but to experiment with new feature
+    implementation like this takes a lot of time.
+    </p>
+
+    <p>
+    This extension allows you to prototype a new feature for Exim quickly and
+    easily. To say it is useful only as a prototyping tool would be incorrect,
+    indeed the performance of the extension and the code running beneath it
+    should suffice for all but the highest volume mail servers.
+    </p>
+
+    <p>
+    Other potential uses of the extension include data source abstraction, for
+    example, using the Python DB-API, you can make your Exim installation
+    database-independant by calling a layer of functions that perform lookups
+    using DB-API compatible interfaces rather than directly themselves.
+    </p>
+
+    <p>
+    If you have questions regarding the usage or behaviour of this extension,
+    please contact the author at the address at the top of this document.
+    </p>
+</div>
+
+
+<a name="install"></a>
+<h2>How do I install the extension?</h2>
+
+<div class="section">
+    <h3>Prerequisites</h3>
+
+    <p>
+    You must be using a version of Python that supports the <em>boolean
+    protocol</em>. This means that a minimum version of <strong>Python
+    2.2.1</strong> is required for operation of the extension.
+    </p>
+
+
+    <p>
+    The extension is distributed in two versions - a <em>patch</em> and a
+    <em>pre-patched tarball</em>. It is recommended that you use the
+    pre-patched tarball unless you need to further extend Exim with other third
+    party patches.
+    </p>
+
+    <p>
+    <strong>Note</strong>: the pre-patched tarball also includes the latest
+    version of the <em>exiscan-acl</em> patch, available from
+    <a href="http://duncanthrax.net/exiscan-acl/"
+    >http://duncanthrax.net/exiscan-acl/</a>.
+    </p>
+    
+    <p>
+    This has little impact on the operation of Exim if you don't use it's
+    features, however it is a very common requirement in modern Exim
+    installations, and as such, is included for ease of installation. The
+    usefulness of this extension is also greatly increased by the presence of
+    the extra ACLs.
+    </p>
+
+
+    <h3>Manually patching the Exim distribution.</h3>
+
+    <p>
+    Download and extract the latest Exim tarball from <a
+    href="http://www.exim.org/">http://www.exim.org/</a>, and the accompanying
+    patch from <a href="http://botanicus.net/dw/">http://botanicus.net/dw/</a>:
+    </p>
+
+    <kbd>
+    $ cd /usr/src<br />
+    $ wget http://www.exim.org/ftp/exim4/exim-4.32.tar.bz2<br />
+    $ wget http://botanicus.net/exim-python/exim-4.32py1.patch<br />
+    $ tar jxvf exim-4.32.tar.bz2
+    </kbd>
+
+    <p>
+    Enter the Exim source directory, and apply the patch:
+    </p>
+
+    <kbd>
+    $ cd exim-4.32<br />
+    $ patch -p1 &lt; ../exim-4.32py1.patch
+    </kbd>
+
+
+    <h3>Configuring the Exim sources.</h3>
+
+    <p>
+    Follow the Exim installation procedure outlined in the specification:
+    <a href="http://www.exim.org/exim-html-4.30/doc/html/spec_4.html"
+    >http://www.exim.org/exim-html-4.30/doc/html/spec_4.html</a>.
+    </p>
+
+    <p>
+    In <code>Local/Makefile</code>, you will additionally need to specify the
+    <code>EXIM_PYTHON</code>, <code>PYTHON_CC</code>,
+    <code>PYTHON_CCOPTS</code>, and <code>PYTHON_LIBS</code> variables. The
+    defaults should suffice, although you may need to adjust the included paths
+    if you have installed Python to a non-standard location.
+    </p>
+
+
+    <h3>Additional configuration directives.</h3>
+
+    <p>
+    In order to enable the extension, you must tell it the name of a Python
+    source file to load and compile at startup. Any modules, packages,
+    functions, and classes that you wish to use should be defined in this file,
+    or imported into it using the Python <code>import</code> statement.
+    </p>
+
+
+    <h4>python_at_start</h4>
+
+    <p>
+    The boolean <code>python_at_start</code> parameter indicates to Exim
+    whether or not it should load the extension at startup. It defaults to
+    <code>false</code>, to help reduce daemon memory usage slightly. Setting it
+    to <code>true</code> will increase the performance of the server when
+    Python calls are made later on. This is recommended for production servers.
+    </p>
+
+
+    <h4>python_startup</h4>
+
+    <p>
+    The string <code>python_startup</code> parameter specifies the name of the
+    Python source file to load and compile at startup. This parameter must be
+    set to a valid (existing, and syntactically valid) source file pathname in
+    order for the extension to be used.
+    </p>
+
+
+    <h4>Example:</h4>
+
+    <kbd>
+    # Parse and load a Python module for use in ${python} expansions.<br />
+    python_at_start = true<Br />
+    python_startup = /etc/exim/exim.py
+    </kbd>
+</div>
+
+
+
+
+<a name="usage"></a>
+<h2>How do I use the extension?</h2>
+
+<div class="section">
+    <h3>How the extension loads and runs your code.</h3>
+
+
+    <h4>File loading.</h4>
+
+    <p>
+    At startup, the extension will attempt to read in the contents of the file
+    specified by the <code>python_startup</code> configuration parameter,
+    compile it, and execute it as a module.
+    </p>
+
+    <h4>Usage of "__name__".</h4>
+
+    <p>
+    When the extension executes your code, it sets the module-level variable
+    <code>__name__</code> to <code>__exim__</code>. The usage semantics of
+    <code>__name__</code> are aligned with how Python uses it.
+    </p>
+    
+    <p>
+    By testing <code>__name__</code>, it is possible (although impractical in
+    many cases) to write a single Python source file that will operate as a
+    standard Python module, an Exim-Python module, and as a command-line tool.
+    Here is an example:
+    </p>
+
+    <kbd>
+    if __name__ == '__main__':<br />
+        &nbsp;&nbsp;&nbsp; run_commandline()<br />
+    <br />
+    elif __name__ == '__exim__':<br />
+        &nbsp;&nbsp;&nbsp; init_exim_module()<br />
+    <br />
+    else:<br />
+        &nbsp;&nbsp;&nbsp; pass
+        # Running as a Python module, do nothing.
+    </kbd>
+
+
+
+    <h3>How Python functions and methods are called.</h3>
+
+    <p>
+    When the extension encounters a <code>${python {&lt;fn&gt;} ...}</code>
+    expansion, it resolves the name <code>&lt;fn&gt;</code>. In the module
+    loaded previously. <code>...</code> may be one or more string arguments
+    that will be passed to the Python function, encapsulated in braces.
+    </p>
+
+    <h4>Return values and exceptions.</h4>
+
+    <p>
+    Several rules are applied to the result of your Python function, and it is
+    very important you understand them. <strong>Note</strong>: it is an error
+    if your Python function does not return a value!
+    </p>
+
+    <ul>
+    <li>If the called function returns <code>None</code> (implicit default if
+        no <code>return</code> with value executed), then the expansion is
+        forced to fail.</li>
+
+    <li>If the called function generates an exception, the exception will be
+        printed on <code>sys.stderr</code>, a log will be made in the paniclog,
+        and the expansion will be forced to fail.</li>
+
+    <li>If the called function returns <code>True</code> or <code>False</code>
+        (the boolean singletons), these are converted to the strings
+        <code>true</code> and <code>false</code> respectively.</li>
+    </ul>
+
+
+
+
+    <h3>Loading and initialising module resources.</h3>
+
+    <p>
+    Exim is a rather complex piece of software, and the execution path it takes
+    can be quite confusing at times. For this reason, it is desirable to be as
+    careful as possible when initialising and using resources.
+    </p>
+
+
+    <h4>The problem.</h4>
+
+    <p>
+    Exim forks quite regularly, and much of it's operation happens inside a
+    subprocess. When Exim performs a fork, any objects existing in the Python
+    interpreter at the time of fork will now be duplicated.
+    </p>
+    
+    <p>
+    This can lead to dangerous and incorrect use of, for example, database
+    connections, which will now have essentially two clients connected to only
+    one client's connection.
+    </p>
+
+    <p>
+    The extension as yet does not provide any automatic means for handling
+    objects that should be destroyed or reinitialised at fork time, so it is up
+    to you to do this.
+    </p>
+
+    <!-- <p>
+    The resulting code often makes judicious use of global variables, that
+    while ugly, are the best solution to the problem.
+    </p> -->
+
+
+    <h4>A simple solution.</h4>
+
+    <p>
+    Here, our dangerous resource is created and destroyed every time the
+    function is entered. This avoids the problem in almost all cases.
+    </p>
+
+    <kbd>
+    def get_db():<br />
+    &nbsp; &nbsp; db = MySQL.connect(**mysql_connection_details)<br />
+    &nbsp; &nbsp; return db, db.cursor()<br />
+    <br />
+    <br />
+    def lookup_password(username):<br />
+    &nbsp; &nbsp; db, cursor = get_db()<br />
+    <br />
+    &nbsp; &nbsp; if not cursor.execute("""SELECT ..."""):<br />
+    &nbsp; &nbsp; &nbsp; &nbsp; return None # force failure.<br />
+    <br />
+    &nbsp; &nbsp; return cursor.fetchone()[0]
+    </kbd>
+</div>
+
+
+
+<a name="notes"></a>
+<h2>Things you should know before use.</h2>
+
+<div class="section">
+    <h3>Restrictions</h3>
+
+    <p>
+    Every feature of the Python environment is not available from within Exim.
+    Certain limitations are placed on your code to avoid destablizing the Exim
+    server process. Here they are:
+    </p>
+
+
+    <h4>Avoid the use of threads.</h4>
+
+    <p>
+    Or, do so at your own risk. There are many complications associated with
+    the use of threads, and you can almost certainly accomplish your goal
+    without using them.
+    </p>
+
+
+    <h4>Avoid signal manipulation.</h4>
+
+    <p>
+    At this time, it is currently unknown how Exim would deal with restarting
+    system calls in the case of a signal delivery handled by the extension. It
+    is recommended that you avoid all use of the <code>signal</code> module
+    until usage documentation appears in a future release of this extension.
+    </p>
+
+
+    <h3>Other usage notes.</h3>
+
+    <ul>
+    <li>
+        If your code opens any files, it is recommended that you use the
+        <code>fcntl.FD_CLOEXEC</code> flag on them, in order to enhance
+        security, and keep the files within their required scope.
+    </li>
+
+    <li>
+        If you are seeing failed string expansions, but no further traceback
+        information is being provided, you may want to reopen the
+        <code>sys.stderr</code> object in your module, directed to a file in
+        <code>/tmp</code>. A better solution to this is in the works.
+    </li>
+
+    <li>
+        If you instantiate a class, or wish to write directly to a function or method
+        or callable class deep inside a module hierarchy, you may do so. Example:
+
+        <kbd>
+        # Python code:<br />
+        import sys<br />
+        <br />
+        # Exim expansion:<br />
+        ${python {sys.stderr.write} {$sender_host_address}}
+        </kbd>
+    </li>
+    </ul>
+</div>
+
+
+
+<a name="examples"></a>
+<h2>Usage examples.</h2>
+
+
+<div class="section">
+    <h3>Deny connections from certain countries using GeoIP.</h3>
+
+    <p>
+    This example combines the extension with Exim's built-in access control
+    lists. Here, we prevent connections to the mail server unless they
+    originate a country that is specifically authorised to send e-mail to us.
+    This is an effective, if dangerous, anti-spam measure for English speakers.
+    </p>
+
+    <p>
+    It requires the GeoIP client library, a copy of the GeoIP database, and the
+    GeoIP Python bindings. See <a href="http://www.maxmind.com/app/python"
+    >http://www.maxmind.com/app/python</a>.
+    </p>
+
+
+    <h4>Python Module</h4>
+
+    <kbd>
+    import GeoIP<br />
+    <br />
+    gi = GeoIP.new(GeoIP.GEOIP_MEMORY_CACHE)<br />
+    allowed_countries = [ 'UK', 'US', 'CA', 'EU', 'IE' ]<br />
+    <br />
+    <br />
+    def connect_denied(remote_addr)<br />
+    &nbsp; &nbsp; if not remote_addr: # Local connection.<br />
+    &nbsp; &nbsp; &nbsp; &nbsp; return False # Allow it.<br />
+    <br />
+    &nbsp; &nbsp; country = gi.country_code_by_addr(remote_addr)<br />
+    &nbsp; &nbsp; return country not in allowed_countries
+    </kbd>
+
+
+    <h4>Exim Configuration</h4>
+
+    <kbd>
+    # My "acl_smtp_connect" ACL:<br />
+    <br />
+    acl_check_connect:<br />
+    &nbsp; &nbsp; deny condition = ${python {connect_denied} {$sender_host_address}}<br />
+    &nbsp; &nbsp; &nbsp; &nbsp;
+        &nbsp;message &nbsp; = "Your country is not allowed to connect to this server."<br />
+    </kbd>
+
+</div>
+
+
+
+
+<a name="changes"></a>
+<h2>Changes between versions.</h2>
+
+
+<div class="section">
+    <h3>January 21st, 2006.</h3>
+
+    <ul>
+    <li>Merged the patch with exim-4.60.</li>
+    </ul>
+
+
+    <h3>April 25th, 2004.</h3>
+
+    <ul>
+    <li>First public beta release.</li>
+    <li>Added HTML documentation.</li>
+    <li>Added <code>obj.subobj.subobj.callable</code> resolution.</li>
+    <li>Fixed silly reference counting bug in <code>python_resolve()</code>.</li>
+    </ul>
+
+
+    <h3>February 20th, 2004.</h3>
+
+    <ul>
+    <li>Initial public alpha release.</li>
+    </ul>
+
+</div>
+
+
+
+
+<a name="future"></a>
+<h2>Future considerations.</h2>
+
+
+<div class="section">
+    <h3>Needs fixed.</h3>
+
+    <ul>
+    <li>When running Exim in debug mode, for example, with 
+        <code>exim -d -bd</code>, pressing the interrupt key will not shut Exim
+        down. This is evidence that Python is still further damaging signals or
+        some other behaviour, and requires investigation.</li>
+
+    </ul>
+
+
+
+    <h3>Needs tested.</h3>
+
+    <ul>
+    <li>Verify that <code>save_signals()</code> and <code>load_signals()</code>
+        in <code>python.c</code> are working effectively.</li>
+
+    <li>Ensure that <code>PyOS_AfterFork()</code> is called only when
+        necessary.</li>
+
+    <li>Check the safety of <code>while ()</code> predicates in
+        <code>python.c:python_resolve()</code>.</li>
+
+    </ul>
+
+
+
+    <h3>Needs implemented.</h3>
+
+    <ul>
+    <li>Add memory checking to <code>python.c:call_python_cat()</code> in the
+        arg tuple build.</li>
+
+    <li>Add memory checking to <code>python.c:save_signals()</code>.
+
+    <li>Remove the requirement for <code>#undef HAVE_SETEUID</code> in
+        <code>python.c</code>. Find out if it is Exim or Python being
+        ignorant.</li>
+
+    <li>Add support for <code>${pythonkw {keywordlist} [{arg1} [{argn}
+        ..]]}</code> for calling objects that can accept keyword arguments.
+        keywordlist will be of the exim form <code>key=val key2=val2</code> and
+        so on.</li>
+
+    <li>Add support for converting Python dictionaries into Exim-style
+        <code>key=val</code> strings on return from a function.</li>
+
+    <li>Make Python traceback output configurable to syslog, file, standard
+        error, or Exim's paniclog.</li>
+
+    </ul>
+
+
+
+    <h3>The wishlist.</h3>
+
+    <ul>
+    <li>Add a standard way of registering objects that need reinitialised after
+        a fork. Some sort of
+        <code>
+            (&lt;parent&gt;,
+             &lt;object_name&gt;,
+             &lt;constructor&gt;,
+             &lt;constructor_args&gt;,
+             &lt;constructor_kwargs&gt;,
+             &lt;reinit_where&gt;)</code>
+        6-tuple?</li>
+
+    <li>Add support for modifying certain Exim variables at run-time, for hot
+        reconfiguration, and so fourth. This would require the ability to
+        safely trigger Python code at arbitrary locations in Exim. A
+        mammoth task, and a potentially involved implementation.</li>
+
+    <li>Integrate the exim-python.html documentation file into the Exim
+        specification, and provide the patched documentation online as
+        HTML.</li>
+
+    <li>Make available a <code>python</code> router, transport, authenticator,
+        and lookup. This might be useful to some, for example, for SQL-backed
+        e-mail storage.</li>
+
+    <li>Add a general <code>exim</code> module, to allow certain internal Exim
+        functions be called from Python. This would also encapsulate the
+        run-time reconfiguration wishlist item.</li>
+</div>
+
+</body>
+</html>
